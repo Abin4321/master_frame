@@ -1,37 +1,42 @@
-import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import Courses from './pages/Courses';
 import Dashboard from './pages/Dashboard';
-import VideoPlayer from './pages/VideoPlayer';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import ProtectedRoute from './components/ProtectedRoute';
 
 const App = () => {
   return (
     <>
       <Navbar />
       <Routes>
+        {/* Public Routes */}
+        <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/" element={<Home />} />
-        <Route path="/courses" element={<Courses />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/video" element={<VideoPlayer />} />
+
+        {/* Protected Routes */}
+        <Route
+          path="/courses"
+          element={
+            <ProtectedRoute>
+              <Courses />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
     </>
   );
-};
-
-
-
-const styles = {
-  page: {
-    padding: '2rem',
-    textAlign: 'center',
-    fontSize: '1.5rem',
-  },
 };
 
 export default App;

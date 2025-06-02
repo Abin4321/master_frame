@@ -12,20 +12,32 @@ import {
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { supabase } from '../lib/supabaseClient'; // ✅ Import Supabase
 
 const Login = () => {
   const navigate = useNavigate();
   const [form, setForm] = useState({ email: '', password: '' });
   const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState(null); // ✅ Track errors
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    console.log('Logging in with:', form);
-    navigate('/dashboard');
+
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: form.email,
+      password: form.password
+    });
+
+    if (error) {
+      setError(error.message); // ✅ Display Supabase error
+    } else {
+      setError(null);
+      navigate('/dashboard');
+    }
   };
 
   const togglePasswordVisibility = () => {
@@ -85,6 +97,11 @@ const Login = () => {
                 ),
               }}
             />
+            {error && (
+              <Typography color="error" mt={1}>
+                {error}
+              </Typography>
+            )}
             <Button
               type="submit"
               fullWidth

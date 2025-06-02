@@ -1,4 +1,4 @@
-// src/pages/Register.jsx
+// /pages/Register.jsx
 import React, { useState } from 'react';
 import {
   Box,
@@ -7,36 +7,53 @@ import {
   Typography,
   Paper,
   IconButton,
-  InputAdornment
+  InputAdornment,
 } from '@mui/material';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { supabase } from '../lib/supabaseClient';
 
 const Register = () => {
   const navigate = useNavigate();
   const [form, setForm] = useState({ name: '', email: '', password: '' });
   const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState(null);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
-  };
-
-  const handleRegister = (e) => {
-    e.preventDefault();
-    console.log('Registering:', form);
-    navigate('/dashboard');
   };
 
   const togglePasswordVisibility = () => {
     setShowPassword((prev) => !prev);
   };
 
+  const handleRegister = async (e) => {
+    e.preventDefault();
+
+    const { data, error } = await supabase.auth.signUp({
+      email: form.email,
+      password: form.password,
+      options: {
+        data: {
+          name: form.name,
+        },
+      },
+    });
+
+    if (error) {
+      setError(error.message);
+    } else {
+      setError(null);
+      navigate('/dashboard');
+    }
+  };
+
   return (
     <Box
       sx={{
         minHeight: '100vh',
-        background: 'linear-gradient(to right,rgb(134, 106, 163),rgb(255, 255, 255))',
+        background: 'linear-gradient(to right, #2193b0, #ffffff)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -54,7 +71,7 @@ const Register = () => {
             Create Account
           </Typography>
           <Typography variant="subtitle1" textAlign="center" color="text.secondary" mb={2}>
-            Join <strong>Master Frame</strong> today
+            Join <strong>Master Frame</strong>
           </Typography>
           <Box component="form" onSubmit={handleRegister}>
             <TextField
@@ -69,6 +86,7 @@ const Register = () => {
             <TextField
               label="Email"
               name="email"
+              type="email"
               fullWidth
               margin="normal"
               required
@@ -94,6 +112,11 @@ const Register = () => {
                 ),
               }}
             />
+            {error && (
+              <Typography color="error" mt={1}>
+                {error}
+              </Typography>
+            )}
             <Button
               type="submit"
               fullWidth
