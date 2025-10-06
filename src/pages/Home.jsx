@@ -47,9 +47,9 @@ const Home = () => {
 
   const features = [
     { title: 'Expert Tutors', desc: 'Learn from industry professionals.' },
-    { title: 'Flexible Learning', desc: 'Study at your own pace.' },
-    { title: 'Mobile Friendly', desc: 'Access content on any device.' },
-    { title: 'Community Support', desc: 'Join a vibrant learning community.' },
+    { title: 'Flexible Learning', desc: 'Study at your own pace anytime.' },
+    { title: 'Mobile Friendly', desc: 'Access contents on any device.' },
+    { title: 'Community Support', desc: 'Join vibrant learning community.' },
   ];
 
   return (

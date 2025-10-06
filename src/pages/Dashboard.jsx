@@ -1,5 +1,5 @@
 // src/pages/Dashboard.jsx
-import React, { useEffect, useState, useContext } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Box,
   Typography,
@@ -14,10 +14,15 @@ import {
   Avatar,
   useTheme,
   useMediaQuery,
+  Chip,
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient';
 import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline';
+import SchoolIcon from '@mui/icons-material/School';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import AutoGraphIcon from '@mui/icons-material/AutoGraph';
+import AssignmentTurnedInIcon from '@mui/icons-material/AssignmentTurnedIn';
 import { useAuth } from '../context/AuthContext';
 
 const Dashboard = () => {
@@ -55,14 +60,16 @@ const Dashboard = () => {
       if (error) throw error;
 
       const filtered = data.filter((e) => e.courses !== null);
-      const courses = filtered.map((e) => ({
-  id: e.courses.id,
-  title: e.courses.title,
-  videoUrl: e.courses.video_url, // <-- keep as is if this is already a signed/full URL
-  thumbnail: e.courses.thumbnail,
-  progress: e.progress,
-}));
-
+const courses = filtered
+  .map((e) => ({
+    id: e.courses.id,
+    title: e.courses.title,
+    videoUrl: e.courses.video_url,
+    thumbnail: e.courses.thumbnail,
+    progress: e.progress,
+  }))
+  // sort by progress descending as a fallback
+  .sort((a, b) => b.progress - a.progress);
 
       setEnrolledCourses(courses);
     } catch (err) {
@@ -100,7 +107,9 @@ const Dashboard = () => {
     <Container sx={{ py: 6 }}>
       {/* Greeting */}
       <Box display="flex" flexDirection={isMobile ? 'column' : 'row'} alignItems={isMobile ? 'flex-start' : 'center'} gap={2} mb={4}>
-        <Avatar sx={{ width: 56, height: 56 }}>{user?.user_metadata?.name?.[0] || user?.email?.[0]}</Avatar>
+        <Avatar sx={{ width: 56, height: 56, bgcolor: '#6a0dad' }}>
+          {user?.user_metadata?.name?.[0] || user?.email?.[0]}
+        </Avatar>
         <Box>
           <Typography variant="h5" fontWeight={600}>
             Welcome back, {user?.user_metadata?.name || user?.email}!
@@ -114,21 +123,30 @@ const Dashboard = () => {
       {/* Summary Cards */}
       <Grid container spacing={3} mb={5} justifyContent={isMobile ? 'center' : 'flex-start'}>
         <Grid item xs={12} sm={4} md={4}>
-          <Card sx={{ p: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
-            <Typography variant="subtitle2">Total Enrolled</Typography>
-            <Typography variant="h6">{enrolledCourses.length}</Typography>
+          <Card sx={{ p: 2, display: 'flex', alignItems: 'center', gap: 2, bgcolor: '#973dc4ff' }}>
+            <SchoolIcon sx={{ fontSize: 30, color: '#6a0dad' }} />
+            <Box>
+              <Typography variant="subtitle2">Total Enrolled</Typography>
+              <Typography variant="h6">{enrolledCourses.length}</Typography>
+            </Box>
           </Card>
         </Grid>
         <Grid item xs={12} sm={4} md={4}>
-          <Card sx={{ p: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
-            <Typography variant="subtitle2">Avg Progress</Typography>
-            <Typography variant="h6">{averageProgress}%</Typography>
+          <Card sx={{ p: 2, display: 'flex', alignItems: 'center', gap: 2, bgcolor: '#5abf63ff' }}>
+            <AutoGraphIcon sx={{ fontSize: 30, color: '#43a047' }} />
+            <Box>
+              <Typography variant="subtitle2">Avg Progress</Typography>
+              <Typography variant="h6">{averageProgress}%</Typography>
+            </Box>
           </Card>
         </Grid>
         <Grid item xs={12} sm={4} md={4}>
-          <Card sx={{ p: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
-            <Typography variant="subtitle2">Completed</Typography>
-            <Typography variant="h6">{getCompletedCount()}</Typography>
+          <Card sx={{ p: 2, display: 'flex', alignItems: 'center', gap: 2, bgcolor: '#53a1daff' }}>
+            <AssignmentTurnedInIcon sx={{ fontSize: 30, color: '#1976d2' }} />
+            <Box>
+              <Typography variant="subtitle2">Completed</Typography>
+              <Typography variant="h6">{getCompletedCount()}</Typography>
+            </Box>
           </Card>
         </Grid>
       </Grid>
@@ -144,7 +162,15 @@ const Dashboard = () => {
           {enrolledCourses.map((course) => (
             <Grid item key={course.id} xs={12} sm={6} md={4}>
               <Box display="flex" justifyContent="center">
-                <Card sx={{ width: 360, display: 'flex', flexDirection: 'column' }}>
+                <Card
+                  sx={{
+                    width: 360,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    transition: 'transform 0.2s',
+                    '&:hover': { transform: 'scale(1.03)', boxShadow: '0 8px 20px rgba(0,0,0,0.15)' },
+                  }}
+                >
                   <CardMedia
                     component="img"
                     height="160"
@@ -152,21 +178,35 @@ const Dashboard = () => {
                     alt={course.title}
                   />
                   <CardContent sx={{ flexGrow: 1 }}>
-                    <Typography variant="h6">{course.title}</Typography>
+                    <Box display="flex" alignItems="center" gap={1} mb={1}>
+                      <PlayCircleOutlineIcon sx={{ color: '#6a0dad' }} />
+                      <Typography variant="h6">{course.title}</Typography>
+                    </Box>
+
                     <Typography variant="body2" color="text.secondary">
                       Progress: {course.progress}%
                     </Typography>
-                    <Box
-                      sx={{
-                        backgroundColor: '#e0e0e0',
-                        borderRadius: 1,
-                        overflow: 'hidden',
-                        height: 10,
-                        mt: 1,
-                      }}
-                    >
-                      <Box sx={{ height: '100%', width: `${course.progress}%`, backgroundColor: '#1976d2' }} />
+
+                    <Box sx={{ backgroundColor: '#e0e0e0', borderRadius: 1, overflow: 'hidden', height: 10, mt: 1 }}>
+                      <Box
+                        sx={{
+                          height: '100%',
+                          width: `${course.progress}%`,
+                          backgroundColor: course.progress === 100 ? '#43a047' : '#1976d2',
+                          transition: 'width 0.5s ease',
+                        }}
+                      />
                     </Box>
+
+                    {course.progress === 100 && (
+                      <Chip
+                        label="Completed"
+                        color="success"
+                        size="small"
+                        sx={{ mt: 1 }}
+                        icon={<CheckCircleIcon />}
+                      />
+                    )}
                   </CardContent>
                   <CardActions sx={{ justifyContent: 'flex-end', px: 2, pb: 2 }}>
                     <Button
@@ -174,11 +214,21 @@ const Dashboard = () => {
                       variant="contained"
                       color="primary"
                       onClick={() =>
-                        navigate('/video-player', { state: { videoUrl: course.videoUrl, courseId: course.id } })
+                        navigate('/video-player', {
+                          state: {
+                            videoUrl: course.videoUrl,
+                            courseId: course.id,
+                            progress: course.progress,
+                          },
+                        })
                       }
                       startIcon={<PlayCircleOutlineIcon />}
                     >
-                      {course.progress === 0 ? 'Start Now' : 'Continue Watching'}
+                      {course.progress === 0
+                        ? 'Start Now'
+                        : course.progress === 100
+                        ? 'Start Again'
+                        : 'Continue Watching'}
                     </Button>
                   </CardActions>
                 </Card>
